@@ -20,10 +20,10 @@ def parse_args():
     # Data
     parser.add_argument('--root', type=str, required=True, help='Root directory of the dataset')
     parser.add_argument('--dataset', type=str, default='kvasir_SEG')
-    parser.add_argument('--train_data_dir', type=str, default='kvasir_SEG/Train')
-    parser.add_argument('--test_data_dir', type=str, default='kvasir_SEG/Test')
-    #parse.add_argument('--train_data_dir', type=str, default='CVC-ClinicDB/Train')
-    #parse.add_argument('--test_data_dir', type=str, default='CVC-ClinicDB/Test')
+    parser.add_argument('--train_data_dir', type=str, default='kvasir_SEG\\Train')
+    parser.add_argument('--test_data_dir', type=str, default='kvasir_SEG\\Test')
+    #parse.add_argument('--train_data_dir', type=str, default='CVC-ClinicDB\\Train')
+    #parse.add_argument('--test_data_dir', type=str, default='CVC-ClinicDB\\Test')
     
 
     # Training
@@ -90,7 +90,7 @@ def train(args):
     else:
         labeled_num = args.labeled_num
 
-    print(f"Total training images: {total_num}, labelled: {labeled_num} ({labeled_num / total_num * 100:.2f}%)")
+    # print(f"Total training images: {total_num}, labelled: {labeled_num} ({labeled_num / total_num * 100:.2f}%)")
 
     batch_sampler = TwoStreamBatchSampler(
         total_num, labeled_num, args.labeled_bs, int(args.batch_size) - args.labeled_bs, shuffle=args.shuffle
@@ -123,17 +123,18 @@ def train(args):
     criterion_d = BceDiceLoss1_D().to(device)
 
     # Setup checkpoint directory
-    ckpt_dir = os.path.join(
-        args.checkpoints,
-        f"{args.dataset}",
-        f"{args.method}_{args.model}",
-        f"exp{args.expID}_{args.labeled_perc}",
-    )
-    os.makedirs(ckpt_dir, exist_ok=True)
+    # ckpt_dir = os.path.join(
+    #     args.checkpoints,
+    #     f"{args.dataset}",
+    #     f"{args.method}_{args.model}",
+    #     f"exp{args.expID}_{args.labeled_perc}",
+    # )
+    # os.makedirs(ckpt_dir, exist_ok=True)
 
     # Training loop
     global_iter = 0
-    print('--- Start Training ---')
+    progress_bar = tqdm(total=args.nEpoch * iters_per_epoch, desc='Training', unit='iter')
+    # print('--- Start Training ---')
 
     for epoch in range(args.nEpoch):
         #if global_iter >= args.total_iter:
@@ -141,10 +142,8 @@ def train(args):
 
         model.train()
         model_depth.train()
-        total_batch = int(labeled_num / args.labeled_bs)
-        progress_bar = tqdm(enumerate(train_dataloader), total=total_batch)
 
-        for batch_idx, data in progress_bar:
+        for batch_idx, data in enumerate(train_dataloader):
            # if global_iter >= args.total_iter:
             #    break
 
@@ -217,25 +216,28 @@ def train(args):
             #scheduler_depth.step()
 
             global_iter += 1
+            progress_bar.update(1)
 
             # Logging
-            progress_bar.set_postfix({
-                'iter': global_iter,
-                'loss_rgb': f'{loss_rgb.item():.5f}',
-                'loss_depth': f'{loss_depth.item():.5f}'
-            })
+            if (batch_idx + 1) == iters_per_epoch:
+                progress_bar.set_postfix({
+                    'nEpoch': f'{epoch + 1}/{args.nEpoch}',
+                    'iter_in_epoch': batch_idx + 1
+                })
 
         # Step scheduler once per epoch
         scheduler.step()
         scheduler_depth.step()
 
         # Save checkpoint
-        if (epoch + 1) % args.ckpt_period == 0:
-            pth_path = os.path.join(ckpt_dir, f"checkpoint_epoch_{epoch + 1}.pth")
-            torch.save(model.state_dict(), pth_path)
-            print(f"Saved checkpoint: {pth_path}")
+        # if (epoch + 1) % args.ckpt_period == 0:
+        #     pth_path = os.path.join(ckpt_dir, f"checkpoint_epoch_{epoch + 1}.pth")
+        #     torch.save(model.state_dict(), pth_path)
+        #     print(f"Saved checkpoint: {pth_path}")
 
-    print(f"Training finished")
+    progress_bar.close()
+
+    # print(f"Training finished")
 
 
 if __name__ == '__main__':

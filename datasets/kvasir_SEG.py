@@ -6,6 +6,23 @@ import numpy as np
 import random
 from PIL import ImageFilter
 from PIL import Image
+
+
+def _resolve_by_stem(directory, filename):
+    """Resolve file path by stem when extensions differ across modalities."""
+    exact_path = os.path.join(directory, filename)
+    if os.path.exists(exact_path):
+        return exact_path
+
+    stem = os.path.splitext(filename)[0]
+    for ext in ('.png', '.jpg', '.jpeg', '.bmp', '.tif', '.tiff'):
+        candidate = os.path.join(directory, stem + ext)
+        if os.path.exists(candidate):
+            return candidate
+
+    raise FileNotFoundError(f"Cannot find file for '{filename}' in '{directory}'")
+
+
 def blur(img, p=0.5):
     if random.random() < p:
         sigma = np.random.uniform(0.1, 2.0)
@@ -29,14 +46,14 @@ class kvasir_SEG(Dataset):
         for img_id in self.images_list:
             self.id_list.append(img_id.split('.')[0])
             self.img_list.append(os.path.join(self.data_path, 'images', img_id))  # Image paths
-            self.gt_list.append(os.path.join(self.data_path, 'masks', img_id))  # Mask paths
+            self.gt_list.append(_resolve_by_stem(os.path.join(self.data_path, 'masks'), img_id))  # Mask paths
 
         if True:
             self.depth_list = []
             self.depth1_list = []
             for img_id in self.images_list:
-                self.depth_list.append(os.path.join(self.data_path, 'depth_rgb', img_id))  # Depth paths for train mode
-                self.depth1_list.append(os.path.join(self.data_path, 'depth', img_id))
+                self.depth_list.append(_resolve_by_stem(os.path.join(self.data_path, 'depth_rgb'), img_id))  # Depth paths for train mode
+                self.depth1_list.append(_resolve_by_stem(os.path.join(self.data_path, 'depth'), img_id))
 
 
 
