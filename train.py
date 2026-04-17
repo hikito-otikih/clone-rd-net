@@ -20,10 +20,10 @@ def parse_args():
     # Data
     parser.add_argument('--root', type=str, required=True, help='Root directory of the dataset')
     parser.add_argument('--dataset', type=str, default='kvasir_SEG')
-    parser.add_argument('--train_data_dir', type=str, default='kvasir_SEG\\Train')
-    parser.add_argument('--test_data_dir', type=str, default='kvasir_SEG\\Test')
-    #parse.add_argument('--train_data_dir', type=str, default='CVC-ClinicDB\\Train')
-    #parse.add_argument('--test_data_dir', type=str, default='CVC-ClinicDB\\Test')
+    parser.add_argument('--train_data_dir', type=str, default='kvasir_SEG/Train')
+    parser.add_argument('--test_data_dir', type=str, default='kvasir_SEG/Test')
+    #parse.add_argument('--train_data_dir', type=str, default='CVC-ClinicDB/Train')
+    #parse.add_argument('--test_data_dir', type=str, default='CVC-ClinicDB/Test')
     
 
     # Training
