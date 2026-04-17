@@ -133,7 +133,7 @@ def train(args):
 
     # Training loop
     global_iter = 0
-    progress_bar = tqdm(total=args.nEpoch, desc='Training', unit='epoch')
+    progress_bar = tqdm(total=args.nEpoch, desc='Training', unit='epoch', dynamic_ncols=True)
     # print('--- Start Training ---')
 
     for epoch in range(args.nEpoch):
@@ -217,12 +217,11 @@ def train(args):
 
             global_iter += 1
 
-            # Logging
-            if (batch_idx + 1) == iters_per_epoch:
-                progress_bar.set_postfix({
-                    'nEpoch': f'{epoch + 1}/{args.nEpoch}',
-                    'iter_in_epoch': batch_idx + 1
-                })
+        # Logging
+        progress_bar.set_postfix({
+            'ep': f'{epoch + 1}/{args.nEpoch}',
+            'it': iters_per_epoch
+        }, refresh=False)
 
         # Step scheduler once per epoch
         scheduler.step()
