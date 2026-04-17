@@ -133,7 +133,7 @@ def train(args):
 
     # Training loop
     global_iter = 0
-    progress_bar = tqdm(total=args.nEpoch * iters_per_epoch, desc='Training', unit='iter')
+    progress_bar = tqdm(total=args.nEpoch, desc='Training', unit='epoch')
     # print('--- Start Training ---')
 
     for epoch in range(args.nEpoch):
@@ -216,7 +216,6 @@ def train(args):
             #scheduler_depth.step()
 
             global_iter += 1
-            progress_bar.update(1)
 
             # Logging
             if (batch_idx + 1) == iters_per_epoch:
@@ -228,6 +227,8 @@ def train(args):
         # Step scheduler once per epoch
         scheduler.step()
         scheduler_depth.step()
+
+        progress_bar.update(1)
 
         # Save checkpoint
         # if (epoch + 1) % args.ckpt_period == 0:
