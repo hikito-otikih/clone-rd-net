@@ -20,8 +20,6 @@ def generate_model(option, ema=False):
 class TwoStreamBatchSampler(Sampler):
 
     def __init__(self, total_count, primary_count, primary_batch_size, secondary_batch_size, shuffle=False):
-        super().__init__(data_source=None)
-
         self.indices = list(range(total_count))
         if shuffle:
             random.shuffle(self.indices)
